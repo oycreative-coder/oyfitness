@@ -1,0 +1,931 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מסלול הכושר שלי</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0f1e;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #00e5ff;
+    --accent2: #ff6b35;
+    --accent3: #7c3aed;
+    --text: #e8eaf0;
+    --text-dim: #8892a4;
+    --success: #00c896;
+    --border: rgba(255,255,255,0.07);
+    --glow: 0 0 20px rgba(0,229,255,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Heebo', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    direction: rtl;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 40px 0 30px;
+    position: relative;
+  }
+  header::after {
+    content: '';
+    display: block;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    margin-top: 24px;
+    opacity: 0.4;
+  }
+  .header-badge {
+    display: inline-block;
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    padding: 4px 14px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(26px, 5vw, 42px);
+    font-weight: 900;
+    background: linear-gradient(135deg, #fff 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    margin-bottom: 8px;
+  }
+  .subtitle { color: var(--text-dim); font-size: 15px; }
+
+  /* Stats bar */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  .stat-card:hover { transform: translateY(-2px); border-color: rgba(0,229,255,0.25); }
+  .stat-num { font-size: 28px; font-weight: 900; color: var(--accent); line-height: 1; }
+  .stat-label { font-size: 11px; color: var(--text-dim); margin-top: 4px; letter-spacing: 0.5px; }
+
+  /* Week selector */
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .week-tabs {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .week-tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 10px;
+    font-family: 'Heebo', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .week-tab:hover { border-color: rgba(0,229,255,0.3); color: var(--text); }
+  .week-tab.active {
+    background: rgba(0,229,255,0.1);
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: var(--glow);
+  }
+  .week-tab .done-dot {
+    position: absolute;
+    top: -3px; left: -3px;
+    width: 10px; height: 10px;
+    background: var(--success);
+    border-radius: 50%;
+    border: 2px solid var(--bg);
+    display: none;
+  }
+  .week-tab.completed .done-dot { display: block; }
+
+  /* Phase badge */
+  .phase-info {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .phase-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--accent2);
+    flex-shrink: 0;
+    box-shadow: 0 0 10px var(--accent2);
+  }
+  .phase-name { font-weight: 700; font-size: 15px; }
+  .phase-desc { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+
+  /* Day grid */
+  .days-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 30px;
+  }
+  .day-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+  }
+  .day-card:hover { transform: translateY(-3px); border-color: rgba(0,229,255,0.2); box-shadow: 0 8px 30px rgba(0,0,0,0.3); }
+  .day-card.rest-day { opacity: 0.6; cursor: default; }
+  .day-card.rest-day:hover { transform: none; }
+  .day-card.completed-day { border-color: rgba(0,200,150,0.3); }
+  .day-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .day-num { font-size: 11px; font-weight: 700; color: var(--text-dim); letter-spacing: 1px; }
+  .day-name { font-size: 16px; font-weight: 700; margin-top: 2px; }
+  .day-check {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    transition: all 0.2s;
+    flex-shrink: 0;
+  }
+  .day-card.completed-day .day-check {
+    background: var(--success);
+    border-color: var(--success);
+    color: #000;
+  }
+  .day-body { padding: 12px 16px 14px; }
+  .day-focus { font-size: 12px; color: var(--accent); font-weight: 600; margin-bottom: 8px; }
+  .day-exercises { display: flex; flex-wrap: wrap; gap: 6px; }
+  .ex-chip {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .rest-label { font-size: 13px; color: var(--text-dim); padding: 8px 0; }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border: 1px solid rgba(0,229,255,0.2);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 640px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 40px rgba(0,229,255,0.08);
+    animation: modalIn 0.3s ease;
+  }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: none; } }
+  .modal-header {
+    padding: 22px 22px 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    z-index: 2;
+  }
+  .modal-title { font-size: 20px; font-weight: 900; }
+  .modal-subtitle { font-size: 12px; color: var(--accent); font-weight: 600; margin-top: 4px; }
+  .btn-close {
+    background: rgba(255,255,255,0.06);
+    border: none;
+    color: var(--text);
+    width: 34px; height: 34px;
+    border-radius: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+  .btn-close:hover { background: rgba(255,255,255,0.12); }
+  .modal-body { padding: 20px 22px; }
+
+  /* Exercise card */
+  .exercise-item {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    margin-bottom: 14px;
+    overflow: hidden;
+  }
+  .exercise-item:last-child { margin-bottom: 0; }
+  .ex-top {
+    padding: 14px 16px 0;
+  }
+  .ex-video-wrap {
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    margin-bottom: 12px;
+    position: relative;
+    padding-top: 52%;
+  }
+  .ex-video-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: none;
+    border-radius: 12px;
+  }
+  .ex-info { flex: 1; min-width: 0; }
+  .ex-title { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .ex-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 6px; }
+  .ex-badge {
+    background: rgba(0,229,255,0.1);
+    border: 1px solid rgba(0,229,255,0.2);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 6px;
+  }
+  .ex-badge.orange {
+    background: rgba(255,107,53,0.1);
+    border-color: rgba(255,107,53,0.2);
+    color: var(--accent2);
+  }
+  .ex-tip { font-size: 11px; color: var(--text-dim); line-height: 1.5; }
+
+  /* Complete button */
+  .btn-complete {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent3), var(--accent));
+    border: none;
+    border-radius: 14px;
+    color: #000;
+    font-family: 'Heebo', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .btn-complete:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,229,255,0.3); }
+  .btn-complete.done {
+    background: linear-gradient(135deg, #00c896, #00a876);
+  }
+
+  /* Progress bar */
+  .progress-section { margin-bottom: 24px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; }
+  .progress-label span:first-child { color: var(--text-dim); }
+  .progress-label span:last-child { color: var(--accent); font-weight: 700; }
+  .progress-track {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent3), var(--accent));
+    border-radius: 4px;
+    transition: width 0.6s ease;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+
+  @media (max-width: 500px) {
+    .stats-bar { grid-template-columns: repeat(3,1fr); }
+    .stat-num { font-size: 22px; }
+    .week-tab { padding: 7px 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-badge">תוכנית 8 שבועות</div>
+    <h1>מסלול הכושר שלי 💪</h1>
+    <p class="subtitle">15–20 דקות ביום · 5 ימים בשבוע · בית</p>
+  </header>
+
+  <div class="progress-section">
+    <div class="progress-label">
+      <span>התקדמות כוללת</span>
+      <span id="totalPct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="totalBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="stats-bar">
+    <div class="stat-card">
+      <div class="stat-num" id="statDone">0</div>
+      <div class="stat-label">אימונים הושלמו</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statStreak">0</div>
+      <div class="stat-label">ימים ברצף</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statWeek">1</div>
+      <div class="stat-label">שבוע נוכחי</div>
+    </div>
+  </div>
+
+  <div class="section-title">בחר שבוע</div>
+  <div class="week-tabs" id="weekTabs"></div>
+
+  <div class="phase-info" id="phaseInfo">
+    <div class="phase-dot"></div>
+    <div>
+      <div class="phase-name" id="phaseName"></div>
+      <div class="phase-desc" id="phaseDesc"></div>
+    </div>
+  </div>
+
+  <div class="days-grid" id="daysGrid"></div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modalTitle"></div>
+        <div class="modal-subtitle" id="modalSubtitle"></div>
+      </div>
+      <button class="btn-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+
+const EXERCISES = {
+  squats: {
+    name: "סקוואט",
+    youtube: "aclHkVaku9U",
+    emoji: "🦵",
+    tip: "עמוד עם רגליים ברוחב כתפיים, כופף ברכיים ושלח את האגן לאחור כאילו אתה יושב על כיסא. גב ישר!"
+  },
+  wallPushup: {
+    name: "שכיבות סמיכה מהקיר",
+    youtube: "x4AkMVzfKpE",
+    emoji: "🤲",
+    tip: "עמוד מול הקיר, שים ידיים בגובה החזה. כופף מרפקים והתקרב לקיר, חזור. קל יותר ממשכיבות סמיכה רגילות."
+  },
+  pushup: {
+    name: "שכיבות סמיכה (על ברכיים)",
+    youtube: "jWxvty2KROs",
+    emoji: "💪",
+    tip: "ניתן להתחיל על הברכיים. גוף ישר מהראש לברכיים, הורד עד שהחזה כמעט נוגע ברצפה."
+  },
+  marchingInPlace: {
+    name: "צעידה במקום",
+    youtube: "FMne3L_3yxs",
+    emoji: "🚶",
+    tip: "הרם ברכיים לגובה מותן, הנד ידיים בקצב קבוע. שמור על קצב נוח ושווה."
+  },
+  gluteBridge: {
+    name: "גשר ירכיים",
+    youtube: "OUgsJ8-Vi0E",
+    emoji: "🍑",
+    tip: "שכב על הגב, ברכיים כפופות, כפות רגליים שטוחות על הרצפה. הרם אגן עד שגוף ישר, סחט ישבן בחלק העליון."
+  },
+  catCow: {
+    name: "חתול-פרה (מתיחה)",
+    youtube: "kqnua4rHVVA",
+    emoji: "🐱",
+    tip: "על ארבע: שאיפה – קמור גב, הורד ראש (חתול); נשיפה – שקע בטן, הרם ראש (פרה). זורם ואיטי."
+  },
+  standingSideReach: {
+    name: "מתיחה צידית בעמידה",
+    youtube: "L_xrDAtykMI",
+    emoji: "🙆",
+    tip: "עמוד, הרם יד אחת מעל הראש ונטה הצידה לאט. החזק 20 שניות ועבור לצד השני."
+  },
+  chairDip: {
+    name: "טריצפס על כיסא",
+    youtube: "0326dy_-CzM",
+    emoji: "🪑",
+    tip: "שב בקצה כיסא יציב, ידיים לצדדים. הורד גוף לאט, כופף מרפקים ל-90°, חזור למעלה."
+  },
+  highKnees: {
+    name: "ברכיים גבוהות",
+    youtube: "ZZZoCNMU48U",
+    emoji: "🏃",
+    tip: "רץ במקום תוך הרמת ברכיים לגובה מותן. שמור על קצב נוח, לא חייב להיות מהיר מאוד."
+  },
+  plankKnees: {
+    name: "פלנק על ברכיים",
+    youtube: "yet6RGlcCi8",
+    emoji: "🧘",
+    tip: "תמוך על אמות ידיים וברכיים. גוף ישר מהראש לברכיים. שמור על נשימה שווה ובטן מכווצת."
+  },
+  lunge: {
+    name: "לאנג' (צעד פסיעה)",
+    youtube: "QOVaHwm-Q6U",
+    emoji: "🚀",
+    tip: "צעד קדימה עם רגל אחת, הורד ברך אחורית לכיוון הרצפה. גב ישר, ברך קדמית לא עוברת את האצבעות."
+  },
+  deadBug: {
+    name: "חיפושית מתה",
+    youtube: "4XLEnwUr1d8",
+    emoji: "🐛",
+    tip: "שכב על הגב, ידיים לתקרה, ברכיים כפופות ל-90°. הורד יד ורגל נגדית לאט, חזור. מחזק ליבה בעדינות."
+  },
+  jumpingJacks: {
+    name: "ג'אמפינג ג'קס",
+    youtube: "c4DAnQ6DtF8",
+    emoji: "⭐",
+    tip: "קפוץ תוך פתיחת רגליים וידיים לצדדים, חזור. אם קשה, תעשה ללא קפיצה – צעד החוצה."
+  },
+  tricepStretch: {
+    name: "מתיחת טריצפס",
+    youtube: "vBe1s3TKFM4",
+    emoji: "💆",
+    tip: "הרם יד מעל הראש, כופף מרפק מאחורי הראש. לחץ עם היד השנייה על המרפק בעדינות. החזק 20 שניות."
+  },
+  childsPose: {
+    name: "פוזיציית ילד",
+    youtube: "2MJGg-dUKh0",
+    emoji: "🙏",
+    tip: "שב על עקבים, שלח ידיים קדימה על הרצפה, הורד מצח. נשום עמוק ומתח את הגב. מתיחה מעולה."
+  }
+};
+
+const PHASES = {
+  1: { name: "שלב א׳ – יסודות", desc: "שבועות 1–2: תנועות בסיס, הגוף מתרגל, מנוחה ארוכה בין סטים", color: "#00e5ff" },
+  2: { name: "שלב ב׳ – בנייה", desc: "שבועות 3–4: יותר חזרות, פחות מנוחה, תוספת לאנג'", color: "#ff6b35" },
+  3: { name: "שלב ג׳ – כוח", desc: "שבועות 5–8: עצימות גבוהה יותר, תרגילים מאתגרים, כוח אמיתי", color: "#7c3aed" }
+};
+
+// 8-week program (5 training days per week)
+const PROGRAM = {
+  1: { phase: 1, days: [
+    { type: 'train', name: "יום א׳", focus: "גוף מלא", exercises: [
+      {id:'marchingInPlace', sets:2, reps:'2 דקות', rest:'60 שנ׳'},
+      {id:'wallPushup', sets:2, reps:'8', rest:'60 שנ׳'},
+      {id:'squats', sets:2, reps:'8', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:2, reps:'10', rest:'60 שנ׳'},
+      {id:'catCow', sets:1, reps:'10', rest:'30 שנ׳'}
+    ]},
+    { type: 'rest', name: "יום ב׳" },
+    { type: 'train', name: "יום ג׳", focus: "ליבה ועליון", exercises: [
+      {id:'marchingInPlace', sets:2, reps:'90 שנ׳', rest:'45 שנ׳'},
+      {id:'wallPushup', sets:2, reps:'10', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:2, reps:'20 שנ׳', rest:'60 שנ׳'},
+      {id:'standingSideReach', sets:1, reps:'30 שנ׳ לכל צד', rest:'30 שנ׳'},
+      {id:'catCow', sets:1, reps:'8', rest:''}
+    ]},
+    { type: 'train', name: "יום ד׳", focus: "רגליים ותחתון", exercises: [
+      {id:'squats', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:2, reps:'12', rest:'45 שנ׳'},
+      {id:'marchingInPlace', sets:2, reps:'2 דקות', rest:'45 שנ׳'},
+      {id:'childsPose', sets:1, reps:'45 שנ׳', rest:''}
+    ]},
+    { type: 'rest', name: "יום ה׳" },
+    { type: 'train', name: "יום ו׳", focus: "גוף מלא + אירובי", exercises: [
+      {id:'marchingInPlace', sets:2, reps:'2 דקות', rest:'30 שנ׳'},
+      {id:'wallPushup', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'squats', sets:2, reps:'10', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:2, reps:'12', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:2, reps:'25 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ז׳", focus: "מתיחות ושחזור", exercises: [
+      {id:'catCow', sets:2, reps:'10', rest:'30 שנ׳'},
+      {id:'childsPose', sets:2, reps:'45 שנ׳', rest:'30 שנ׳'},
+      {id:'standingSideReach', sets:2, reps:'30 שנ׳ לכל צד', rest:'20 שנ׳'},
+      {id:'gluteBridge', sets:1, reps:'10', rest:''}
+    ]}
+  ]},
+  2: { phase: 1, days: [
+    { type: 'train', name: "יום א׳", focus: "גוף מלא", exercises: [
+      {id:'marchingInPlace', sets:2, reps:'2 דקות', rest:'45 שנ׳'},
+      {id:'wallPushup', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'squats', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:2, reps:'12', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:2, reps:'20 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'rest', name: "יום ב׳" },
+    { type: 'train', name: "יום ג׳", focus: "עליון + ליבה", exercises: [
+      {id:'wallPushup', sets:3, reps:'12', rest:'60 שנ׳'},
+      {id:'chairDip', sets:2, reps:'8', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:2, reps:'25 שנ׳', rest:'60 שנ׳'},
+      {id:'deadBug', sets:2, reps:'8 לכל צד', rest:'45 שנ׳'},
+      {id:'catCow', sets:1, reps:'10', rest:''}
+    ]},
+    { type: 'train', name: "יום ד׳", focus: "רגליים + אירובי", exercises: [
+      {id:'squats', sets:3, reps:'12', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:3, reps:'12', rest:'45 שנ׳'},
+      {id:'highKnees', sets:2, reps:'30 שנ׳', rest:'60 שנ׳'},
+      {id:'childsPose', sets:1, reps:'45 שנ׳', rest:''}
+    ]},
+    { type: 'rest', name: "יום ה׳" },
+    { type: 'train', name: "יום ו׳", focus: "גוף מלא", exercises: [
+      {id:'highKnees', sets:2, reps:'30 שנ׳', rest:'45 שנ׳'},
+      {id:'pushup', sets:2, reps:'8', rest:'75 שנ׳'},
+      {id:'squats', sets:3, reps:'12', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'25 שנ׳', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:2, reps:'15', rest:'45 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ז׳", focus: "שחזור פעיל", exercises: [
+      {id:'catCow', sets:2, reps:'12', rest:'30 שנ׳'},
+      {id:'childsPose', sets:2, reps:'60 שנ׳', rest:'30 שנ׳'},
+      {id:'standingSideReach', sets:2, reps:'30 שנ׳ לכל צד', rest:'20 שנ׳'},
+      {id:'marchingInPlace', sets:1, reps:'3 דקות', rest:''}
+    ]}
+  ]},
+  3: { phase: 2, days: [
+    { type: 'train', name: "יום א׳", focus: "גוף מלא", exercises: [
+      {id:'jumpingJacks', sets:2, reps:'30 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'squats', sets:3, reps:'15', rest:'45 שנ׳'},
+      {id:'gluteBridge', sets:3, reps:'15', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:2, reps:'30 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'rest', name: "יום ב׳" },
+    { type: 'train', name: "יום ג׳", focus: "עליון + ליבה", exercises: [
+      {id:'pushup', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'chairDip', sets:3, reps:'10', rest:'60 שנ׳'},
+      {id:'deadBug', sets:3, reps:'10 לכל צד', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'30 שנ׳', rest:'60 שנ׳'},
+      {id:'catCow', sets:1, reps:'10', rest:''}
+    ]},
+    { type: 'train', name: "יום ד׳", focus: "רגליים", exercises: [
+      {id:'squats', sets:4, reps:'15', rest:'45 שנ׳'},
+      {id:'lunge', sets:2, reps:'8 לכל רגל', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:3, reps:'15', rest:'45 שנ׳'},
+      {id:'highKnees', sets:2, reps:'45 שנ׳', rest:'60 שנ׳'},
+      {id:'childsPose', sets:1, reps:'45 שנ׳', rest:''}
+    ]},
+    { type: 'rest', name: "יום ה׳" },
+    { type: 'train', name: "יום ו׳", focus: "גוף מלא", exercises: [
+      {id:'jumpingJacks', sets:3, reps:'30 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:3, reps:'12', rest:'60 שנ׳'},
+      {id:'squats', sets:3, reps:'15', rest:'45 שנ׳'},
+      {id:'lunge', sets:2, reps:'10 לכל רגל', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'30 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ז׳", focus: "שחזור", exercises: [
+      {id:'catCow', sets:2, reps:'12', rest:'30 שנ׳'},
+      {id:'childsPose', sets:2, reps:'60 שנ׳', rest:'30 שנ׳'},
+      {id:'tricepStretch', sets:2, reps:'20 שנ׳ לכל יד', rest:'20 שנ׳'},
+      {id:'standingSideReach', sets:2, reps:'30 שנ׳ לכל צד', rest:''}
+    ]}
+  ]},
+  4: { phase: 2, days: [
+    { type: 'train', name: "יום א׳", focus: "גוף מלא", exercises: [
+      {id:'jumpingJacks', sets:3, reps:'45 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:3, reps:'12', rest:'60 שנ׳'},
+      {id:'squats', sets:4, reps:'15', rest:'45 שנ׳'},
+      {id:'gluteBridge', sets:3, reps:'15', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'30 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'rest', name: "יום ב׳" },
+    { type: 'train', name: "יום ג׳", focus: "עליון + אירובי", exercises: [
+      {id:'highKnees', sets:3, reps:'30 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:4, reps:'12', rest:'60 שנ׳'},
+      {id:'chairDip', sets:3, reps:'12', rest:'60 שנ׳'},
+      {id:'deadBug', sets:3, reps:'10 לכל צד', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'35 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ד׳", focus: "רגליים", exercises: [
+      {id:'squats', sets:4, reps:'18', rest:'45 שנ׳'},
+      {id:'lunge', sets:3, reps:'10 לכל רגל', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:3, reps:'18', rest:'45 שנ׳'},
+      {id:'highKnees', sets:3, reps:'45 שנ׳', rest:'45 שנ׳'},
+      {id:'childsPose', sets:1, reps:'60 שנ׳', rest:''}
+    ]},
+    { type: 'rest', name: "יום ה׳" },
+    { type: 'train', name: "יום ו׳", focus: "גוף מלא אינטנסיבי", exercises: [
+      {id:'jumpingJacks', sets:3, reps:'45 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:4, reps:'12', rest:'60 שנ׳'},
+      {id:'squats', sets:4, reps:'18', rest:'45 שנ׳'},
+      {id:'lunge', sets:3, reps:'10 לכל רגל', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'40 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ז׳", focus: "שחזור", exercises: [
+      {id:'catCow', sets:2, reps:'12', rest:'30 שנ׳'},
+      {id:'childsPose', sets:3, reps:'60 שנ׳', rest:'30 שנ׳'},
+      {id:'tricepStretch', sets:2, reps:'25 שנ׳ לכל יד', rest:'20 שנ׳'},
+      {id:'standingSideReach', sets:2, reps:'30 שנ׳ לכל צד', rest:''}
+    ]}
+  ]},
+  5: { phase: 3, days: [
+    { type: 'train', name: "יום א׳", focus: "כוח גוף מלא", exercises: [
+      {id:'jumpingJacks', sets:3, reps:'45 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:4, reps:'15', rest:'60 שנ׳'},
+      {id:'squats', sets:4, reps:'20', rest:'45 שנ׳'},
+      {id:'lunge', sets:3, reps:'12 לכל רגל', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'40 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'rest', name: "יום ב׳" },
+    { type: 'train', name: "יום ג׳", focus: "עליון + ליבה", exercises: [
+      {id:'highKnees', sets:3, reps:'45 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:4, reps:'15', rest:'60 שנ׳'},
+      {id:'chairDip', sets:4, reps:'12', rest:'60 שנ׳'},
+      {id:'deadBug', sets:3, reps:'12 לכל צד', rest:'45 שנ׳'},
+      {id:'plankKnees', sets:3, reps:'45 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ד׳", focus: "רגליים + אירובי", exercises: [
+      {id:'squats', sets:5, reps:'20', rest:'45 שנ׳'},
+      {id:'lunge', sets:3, reps:'15 לכל רגל', rest:'60 שנ׳'},
+      {id:'gluteBridge', sets:4, reps:'20', rest:'40 שנ׳'},
+      {id:'highKnees', sets:3, reps:'60 שנ׳', rest:'45 שנ׳'},
+      {id:'childsPose', sets:1, reps:'60 שנ׳', rest:''}
+    ]},
+    { type: 'rest', name: "יום ה׳" },
+    { type: 'train', name: "יום ו׳", focus: "גוף מלא", exercises: [
+      {id:'jumpingJacks', sets:3, reps:'60 שנ׳', rest:'30 שנ׳'},
+      {id:'pushup', sets:4, reps:'15', rest:'60 שנ׳'},
+      {id:'squats', sets:4, reps:'20', rest:'45 שנ׳'},
+      {id:'lunge', sets:3, reps:'12 לכל רגל', rest:'60 שנ׳'},
+      {id:'plankKnees', sets:4, reps:'45 שנ׳', rest:'60 שנ׳'}
+    ]},
+    { type: 'train', name: "יום ז׳", focus: "שחזור", exercises: [
+      {id:'catCow', sets:3, reps:'12', rest:'30 שנ׳'},
+      {id:'childsPose', sets:3, reps:'60 שנ׳', rest:'30 שנ׳'},
+      {id:'tricepStretch', sets:2, reps:'25 שנ׳ לכל יד', rest:'20 שנ׳'},
+      {id:'standingSideReach', sets:3, reps:'30 שנ׳ לכל צד', rest:''}
+    ]}
+  ]},
+};
+// Weeks 6-8: reuse week 5 structure with slight intensity increase
+for (let w = 6; w <= 8; w++) {
+  PROGRAM[w] = { phase: 3, days: PROGRAM[5].days.map(d => ({...d, exercises: d.exercises ? d.exercises.map(e => ({...e})) : undefined })) };
+}
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let state = { completed: {}, currentWeek: 1 };
+
+function loadState() {
+  try {
+    const s = localStorage.getItem('fitness_state_v2');
+    if (s) state = JSON.parse(s);
+  } catch(e) {}
+}
+function saveState() {
+  try { localStorage.setItem('fitness_state_v2', JSON.stringify(state)); } catch(e) {}
+}
+
+function getDayKey(week, dayIdx) { return `w${week}_d${dayIdx}`; }
+function isDayDone(week, dayIdx) { return !!state.completed[getDayKey(week, dayIdx)]; }
+function markDayDone(week, dayIdx) {
+  state.completed[getDayKey(week, dayIdx)] = true;
+  saveState();
+}
+
+function getTotalTrainDays() {
+  let total = 0;
+  for (let w = 1; w <= 8; w++) {
+    (PROGRAM[w]?.days || []).forEach(d => { if (d.type === 'train') total++; });
+  }
+  return total;
+}
+function getDoneCount() { return Object.keys(state.completed).length; }
+function getStreak() {
+  // Simple: count consecutive completed weeks
+  let streak = 0;
+  for (let w = 1; w <= 8; w++) {
+    const days = PROGRAM[w].days;
+    const allDone = days.every((d, i) => d.type !== 'train' || isDayDone(w, i));
+    if (allDone && getDoneCount() > 0) streak++;
+    else break;
+  }
+  return streak;
+}
+
+// ─── RENDER ───────────────────────────────────────────────────────────────────
+function renderWeekTabs() {
+  const el = document.getElementById('weekTabs');
+  el.innerHTML = '';
+  for (let w = 1; w <= 8; w++) {
+    const days = PROGRAM[w].days;
+    const trainDays = days.filter(d => d.type === 'train');
+    const doneDays = trainDays.filter((d, i) => {
+      const realIdx = days.indexOf(d);
+      return isDayDone(w, realIdx);
+    });
+    const allDone = trainDays.length > 0 && doneDays.length === trainDays.length;
+    const btn = document.createElement('button');
+    btn.className = 'week-tab' + (w === state.currentWeek ? ' active' : '') + (allDone ? ' completed' : '');
+    btn.innerHTML = `<span class="done-dot"></span>שבוע ${w}`;
+    btn.onclick = () => { state.currentWeek = w; saveState(); renderAll(); };
+    el.appendChild(btn);
+  }
+}
+
+function renderPhase() {
+  const p = PROGRAM[state.currentWeek].phase;
+  const ph = PHASES[p];
+  document.getElementById('phaseName').textContent = ph.name;
+  document.getElementById('phaseDesc').textContent = ph.desc;
+  document.querySelector('.phase-dot').style.background = ph.color;
+  document.querySelector('.phase-dot').style.boxShadow = `0 0 10px ${ph.color}`;
+}
+
+function renderDays() {
+  const grid = document.getElementById('daysGrid');
+  grid.innerHTML = '';
+  const days = PROGRAM[state.currentWeek].days;
+  days.forEach((day, i) => {
+    const done = isDayDone(state.currentWeek, i);
+    const card = document.createElement('div');
+    card.className = 'day-card' + (day.type === 'rest' ? ' rest-day' : '') + (done ? ' completed-day' : '');
+    if (day.type === 'train') card.onclick = () => openModal(state.currentWeek, i);
+
+    if (day.type === 'rest') {
+      card.innerHTML = `
+        <div class="day-header">
+          <div><div class="day-num">יום מנוחה</div><div class="day-name">${day.name}</div></div>
+          <div style="font-size:24px">😴</div>
+        </div>
+        <div class="day-body"><div class="rest-label">מנוחה היא חלק קריטי מהאימון. הגוף בונה כוח בזמן מנוחה.</div></div>
+      `;
+    } else {
+      const chips = (day.exercises||[]).slice(0,3).map(e => `<span class="ex-chip">${EXERCISES[e.id]?.name||e.id}</span>`).join('');
+      card.innerHTML = `
+        <div class="day-header">
+          <div><div class="day-num">${day.name}</div><div class="day-name">${day.focus}</div></div>
+          <div class="day-check">${done ? '✓' : ''}</div>
+        </div>
+        <div class="day-body">
+          <div class="day-focus">⚡ ${day.exercises?.length || 0} תרגילים</div>
+          <div class="day-exercises">${chips}${(day.exercises?.length||0)>3?`<span class="ex-chip">+${day.exercises.length-3}</span>`:''}</div>
+        </div>
+      `;
+    }
+    grid.appendChild(card);
+  });
+}
+
+function renderStats() {
+  const done = getDoneCount();
+  const total = getTotalTrainDays();
+  const pct = Math.round((done / total) * 100);
+  document.getElementById('statDone').textContent = done;
+  document.getElementById('statStreak').textContent = getStreak();
+  document.getElementById('statWeek').textContent = state.currentWeek;
+  document.getElementById('totalPct').textContent = pct + '%';
+  document.getElementById('totalBar').style.width = pct + '%';
+}
+
+function renderAll() {
+  renderWeekTabs();
+  renderPhase();
+  renderDays();
+  renderStats();
+}
+
+// ─── MODAL ────────────────────────────────────────────────────────────────────
+let _modalWeek, _modalDay;
+
+function openModal(week, dayIdx) {
+  _modalWeek = week; _modalDay = dayIdx;
+  const day = PROGRAM[week].days[dayIdx];
+  const done = isDayDone(week, dayIdx);
+  document.getElementById('modalTitle').textContent = `${day.name} – ${day.focus}`;
+  document.getElementById('modalSubtitle').textContent = `שבוע ${week} · ${day.exercises?.length} תרגילים`;
+
+  let html = '';
+  (day.exercises||[]).forEach(ex => {
+    const info = EXERCISES[ex.id];
+    if (!info) return;
+    html += `
+      <div class="exercise-item">
+        <div class="ex-top">
+          <div class="ex-info">
+            <div class="ex-title">${info.emoji} ${info.name}</div>
+            <div class="ex-meta">
+              <span class="ex-badge">🔁 ${ex.reps} חזרות</span>
+              <span class="ex-badge">${ex.sets} סטים</span>
+              ${ex.rest ? `<span class="ex-badge orange">⏱ מנוחה ${ex.rest}</span>` : ''}
+            </div>
+            <div class="ex-tip">${info.tip}</div>
+          </div>
+        </div>
+        <div class="ex-video-wrap">
+          <iframe
+            src="https://www.youtube.com/embed/${info.youtube}?rel=0&modestbranding=1"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowfullscreen
+            loading="lazy"
+          ></iframe>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `<button class="btn-complete ${done ? 'done' : ''}" onclick="completeDay()" id="btnComplete">
+    ${done ? '✅ אימון הושלם!' : '✅ סמן אימון כהושלם'}
+  </button>`;
+
+  document.getElementById('modalBody').innerHTML = html;
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function completeDay() {
+  markDayDone(_modalWeek, _modalDay);
+  document.getElementById('btnComplete').textContent = '✅ אימון הושלם!';
+  document.getElementById('btnComplete').classList.add('done');
+  renderAll();
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('modalOverlay').addEventListener('click', e => {
+  if (e.target === document.getElementById('modalOverlay')) closeModal();
+});
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+loadState();
+renderAll();
+</script>
+</body>
+</html>
